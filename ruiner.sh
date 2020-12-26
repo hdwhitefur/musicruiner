@@ -1,32 +1,3 @@
-desync() {
-  echo "desyncing"
-  input=godknows.mp3
-  length=00:00:30
-  speed=0.99
-
-  if [ "$1" = "-i" ]; then
-    shift
-    input=$1
-    shift
-  fi
-  if [ "$1" = "-l" ]; then
-    shift
-    length=$1
-    shift
-  fi
-  if [ "$1" = "-s" ]; then
-    shift
-    speed=$1
-    shift
-  fi 
-
-  ffmpeg -y -i $input -to $length -filter_complex \
-    "channelsplit=channel_layout=stereo[FL][FR]; \
-    [FR]atempo=$speed[FRS]; \
-    [FL][FRS]join=inputs=2:channel_layout=stereo[out]" -map "[out]" remixed.mp3
-  return
-}
-
 ruin() {
   echo "Ruining..."
   input=godknows.mp3
@@ -72,7 +43,7 @@ case "$1" in
     ;;
   desync)
     shift
-    desync $@
+    ./desync.sh $@
     exit 0
     ;;
 esac
