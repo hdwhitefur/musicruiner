@@ -1,19 +1,21 @@
 argtest() {
-  case "$1" in
-  
+  if [ "$1" = "-a" ]; then
+    shift
+    echo "$1"
+    shift
+  fi
+  if [ "$1" = "-b" ]; then
+    shift
+    echo "$1"
+    shift
+  fi
 }
 
 case "$1" in
-  ruin)
-    echo "help"
-    ;;
-  desync)
+  arg)
     shift
     if test $# -gt 0; then
-      desync $1
-    else
-      desync godknows.mp3
+      argtest $@ #pass all arguments
     fi
     ;;
-  arg) ;;
 esac

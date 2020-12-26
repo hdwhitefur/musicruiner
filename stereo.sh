@@ -1,24 +1,25 @@
 desync() {
-  case "$1" in
-    ruin)
-      echo "help"
-      ;;
-    desync)
-      shift
-      if test $# -gt 0; then
-        desync $1
-      else
-        desync godknows.mp3
-      fi
-      ;;
-  esac
-
   echo "desyncing"
   input=godknows.mp3
   length=00:00:30
   speed=0.99
 
-  #shorten
+  if [ "$1" = "-i" ]; then
+    shift
+    input=$1
+    shift
+  fi
+  if [ "$1" = "-l" ]; then
+    shift
+    length=$1
+    shift
+  fi
+  if [ "$1" = "-s" ]; then
+    shift
+    speed=$1
+    shift
+  fi 
+
   ffmpeg -y -i $input -to $length -filter_complex \
     "channelsplit=channel_layout=stereo[FL][FR]; \
     [FR]atempo=$speed[FRS]; \
@@ -28,31 +29,50 @@ desync() {
 
 ruin() {
   echo "Ruining..."
-  #read INPUT
-  INPUT=godknows.mp3
-  LENGTH=00:00:30
-  OFFSET=200ms
-  DELAY=10
+  input=godknows.mp3
+  length=00:00:30
+  offset=200ms
+  delay=10
 
-  ffmpeg -i $INPUT -to $LENGTH -filter_complex \
+  if [ "$1" = "-i" ]; then
+    shift
+    input=$1
+    shift
+  fi
+  if [ "$1" = "-l" ]; then
+    shift
+    length=$1
+    shift
+  fi
+  if [ "$1" = "-o" ]; then
+    shift
+    offset=$1
+    shift
+  fi 
+  if [ "$1" = "-d" ]; then
+    shift
+    delay=$1
+    shift
+  fi 
+
+  ffmpeg -i $input -to $length -filter_complex \
     "[0]asplit[out1][out2]; \
-    [out2]adelay=$OFFSET[outo]; \
-    [outo]volume=enable='between(t,0,$DELAY)':volume=0[outd]; \
-    [outd]afade=t=in:st=9:d=3[outf]; \
+    [out2]adelay=$offset[outo]; \
+    [outo]volume=enable='between(t,0,$delay)':volume=0[outd]; \
+    [outd]afade=t=in:st=$delay:d=3[outf]; \
     [out1][outf]amix=inputs=2:duration=first" test.mp3 -y
   return
 }
 
 case "$1" in
   ruin)
-    echo "help"
+    shift
+    ruin $@
+    exit 0
     ;;
   desync)
     shift
-    if test $# -gt 0; then
-      desync $1
-    else
-      desync godknows.mp3
-    fi
+    desync $@
+    exit 0
     ;;
 esac
