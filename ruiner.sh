@@ -1,4 +1,5 @@
 input() {
+  echo "Input..."
   ffmpeg -hide_banner -loglevel warning -i godknows.mp3 -f mp3 pipe:
 }
 
@@ -8,6 +9,7 @@ shorten() {
 }
 
 slow() {
+  echo "Slowing..."
   ffmpeg -hide_banner -loglevel warning -i pipe: -filter:a "atempo=0.5" -f mp3 pipe:
 }
 
@@ -15,6 +17,11 @@ offset() {
   echo "Offsetting..."
   offset=200ms
   delay=10
+
+  if [ "$#" -eq 2 ]; then
+    offset=$1
+    delay=$2
+  fi
 
   ffmpeg -hide_banner -loglevel warning -i pipe: -filter_complex \
     "[0]asplit[out1][out2]; \
@@ -29,12 +36,11 @@ output() {
 }
 
 chain() {
-  echo "Ruining step by step..."
   input=godknows.mp3
   length=00:00:30
   offset=200ms
 
-  input | shorten | offset | output
+  input | shorten | offset 250ms 5 | offset 100ms 15 | output
 }
 
 ruin() {
