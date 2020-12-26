@@ -1,12 +1,27 @@
 desync() {
+  case "$1" in
+    ruin)
+      echo "help"
+      ;;
+    desync)
+      shift
+      if test $# -gt 0; then
+        desync $1
+      else
+        desync godknows.mp3
+      fi
+      ;;
+  esac
+
   echo "desyncing"
-  INPUT=$1
-  OUTPUT=date +"%T"
+  input=godknows.mp3
+  length=00:00:30
+  speed=0.99
 
   #shorten
-  ffmpeg -y -i $INPUT -to 00:00:30 -filter_complex \
+  ffmpeg -y -i $input -to $length -filter_complex \
     "channelsplit=channel_layout=stereo[FL][FR]; \
-    [FR]atempo=0.99[FRS]; \
+    [FR]atempo=$speed[FRS]; \
     [FL][FRS]join=inputs=2:channel_layout=stereo[out]" -map "[out]" remixed.mp3
   return
 }
@@ -28,26 +43,16 @@ ruin() {
   return
 }
 
-lazy() {
-  ruin godknows.mp3 00:00:30 200ms 10
-}
-
-val1() {
-  echo | expr $1 + 1
-}
-
-val() {
-  val1 $1
-}
-
 case "$1" in
   ruin)
     echo "help"
     ;;
   desync)
-	  shift
+    shift
     if test $# -gt 0; then
       desync $1
+    else
+      desync godknows.mp3
     fi
     ;;
 esac
