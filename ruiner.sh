@@ -1,13 +1,31 @@
 input() {
-  ffmpeg -hide_banner -i godknows.mp3 -f mp3 pipe:
+  ffmpeg -hide_banner -loglevel warning -i godknows.mp3 -f mp3 pipe:
+}
+
+shorten() {
+  echo "Shortening..."
+  ffmpeg -hide_banner -loglevel warning -i pipe: -to 00:00:30 -f mp3 pipe:
 }
 
 slow() {
-  ffmpeg -hide_banner -i pipe: -filter:a "atempo=0.5" -f mp3 pipe:
+  ffmpeg -hide_banner -loglevel warning -i pipe: -filter:a "atempo=0.5" -f mp3 pipe:
+}
+
+offset() {
+  echo "Offsetting..."
+  offset=200ms
+  delay=10
+
+  ffmpeg -hide_banner -loglevel warning -i pipe: -filter_complex \
+    "[0]asplit[out1][out2]; \
+    [out2]adelay=$offset[outo]; \
+    [outo]volume=enable='between(t,0,$delay)':volume=0[outd]; \
+    [outd]afade=t=in:st=$delay:d=3[outf]; \
+    [out1][outf]amix=inputs=2:duration=first" -f mp3 pipe:
 }
 
 output() {
-  ffmpeg -hide_banner -i pipe: pipeout.mp3 -y
+  ffmpeg -hide_banner -loglevel warning -i pipe: pipeout.mp3 -y
 }
 
 chain() {
@@ -16,7 +34,7 @@ chain() {
   length=00:00:30
   offset=200ms
 
-  input | slow | output
+  input | shorten | offset | output
 }
 
 ruin() {
